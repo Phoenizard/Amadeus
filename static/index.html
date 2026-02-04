@@ -29,18 +29,28 @@
         <!-- Header -->
         <header class="header">
             <div class="header-logo">AMADEUS</div>
-            <div class="header-status">
-                <span class="status-dot" id="statusDot"></span>
-                <span class="status-text" id="statusText">连接中...</span>
+            <div class="header-right">
+                <div class="header-status">
+                    <span class="status-dot" id="statusDot"></span>
+                    <span class="status-text" id="statusText">连接中...</span>
+                </div>
+                <button class="settings-button" id="settingsButton" aria-label="设置">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
             </div>
         </header>
 
-        <!-- Character Portrait -->
-        <div class="portrait-container">
-            <div class="portrait-frame">
-                <img src="assets/kurisu.png" alt="Kurisu" class="portrait-image" id="portrait">
-                <div class="portrait-glow"></div>
-            </div>
+        <!-- Character Display Area (Main Focus) -->
+        <div class="character-display" id="characterDisplay">
+            <img class="character-sprite" id="characterSprite" src="assets/kurisu.png" alt="Character">
+            <div class="character-glow"></div>
+        </div>
+
+        <!-- Dialog Overlay (Bottom) -->
+        <div class="dialog-overlay">
             <!-- Sound Wave Animation -->
             <div class="sound-wave" id="soundWave">
                 <div class="wave-bar"></div>
@@ -49,37 +59,86 @@
                 <div class="wave-bar"></div>
                 <div class="wave-bar"></div>
             </div>
-        </div>
 
-        <!-- Chat Area -->
-        <div class="chat-container" id="chatContainer">
-            <div class="chat-messages" id="chatMessages">
-                <!-- Messages will be inserted here -->
+            <!-- Chat Bubble -->
+            <div class="dialog-bubble" id="dialogBubble">
+                <div class="dialog-text" id="dialogText">点击下方输入框开始对话...</div>
             </div>
-        </div>
 
-        <!-- Input Area -->
-        <div class="input-container">
-            <div class="input-wrapper">
-                <input
-                    type="text"
-                    id="messageInput"
-                    class="message-input"
-                    placeholder="输入消息..."
-                    autocomplete="off"
-                    autocorrect="off"
-                    autocapitalize="off"
-                >
-                <button id="sendButton" class="send-button" aria-label="发送">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/>
-                    </svg>
-                </button>
+            <!-- Input Area -->
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input
+                        type="text"
+                        id="messageInput"
+                        class="message-input"
+                        placeholder="输入消息..."
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="off"
+                    >
+                    <button id="sendButton" class="send-button" aria-label="发送">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
 
         <!-- Scanlines Overlay -->
         <div class="scanlines"></div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">设置</h2>
+                <button class="modal-close" id="closeSettings" aria-label="关闭">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <!-- Sprite Management Section -->
+                <section class="settings-section">
+                    <h3 class="section-title">立绘管理</h3>
+
+                    <!-- Current Sprite Preview -->
+                    <div class="sprite-preview">
+                        <img id="currentSpritePreview" src="assets/kurisu.png" alt="当前立绘">
+                    </div>
+
+                    <!-- Sprite List -->
+                    <div class="sprite-list" id="spriteList">
+                        <!-- Sprites will be populated by JS -->
+                    </div>
+
+                    <!-- Add Sprite Button -->
+                    <div class="sprite-actions">
+                        <input type="file" id="spriteFileInput" accept="image/*" class="hidden">
+                        <button class="btn btn-primary" id="addSpriteButton">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            添加立绘
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Theme Section (Placeholder) -->
+                <section class="settings-section">
+                    <h3 class="section-title">主题设置</h3>
+                    <p class="section-note">更多主题选项将在后续版本中提供</p>
+                </section>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>

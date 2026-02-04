@@ -6,8 +6,11 @@ Flask backend for the Amadeus AI chat application
 """
 
 import json
+import os
+import uuid
 import requests
 from flask import Flask, request, jsonify, send_from_directory
+from werkzeug.utils import secure_filename
 
 from config import (
     LLM_PROVIDER,
@@ -23,6 +26,18 @@ from config import (
 )
 
 app = Flask(__name__, static_folder='static', static_url_path='')
+
+# Upload configuration
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5MB max
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def call_dashscope(messages):
@@ -97,6 +112,88 @@ def health():
         "provider": LLM_PROVIDER,
         "model": DASHSCOPE_MODEL if LLM_PROVIDER == "dashscope" else OLLAMA_MODEL,
     })
+
+
+@app.route('/api/upload', methods=['POST'])
+def upload_file():
+    """Upload image endpoint"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({"error": "没有选择文件"}), 400
+
+        file = request.files['file']
+
+        if file.filename == '':
+            return jsonify({"error": "没有选择文件"}), 400
+
+        if not allowed_file(file.filename):
+            return jsonify({"error": "不支持的文件格式，请上传 PNG、JPG、GIF 或 WebP"}), 400
+
+        # Check file size
+        file.seek(0, 2)
+        size = file.tell()
+        file.seek(0)
+        if size > MAX_CONTENT_LENGTH:
+            return jsonify({"error": "文件大小超过限制 (最大 5MB)"}), 400
+
+        # Generate unique filename
+        ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"{uuid.uuid4().hex}.{ext}"
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+        file.save(filepath)
+
+        return jsonify({
+            "status": "ok",
+            "filename": filename,
+            "url": f"/uploads/{filename}"
+        })
+
+    except Exception as e:
+        app.logger.error(f"Upload error: {e}")
+        return jsonify({"error": "上传失败"}), 500
+
+
+@app.route('/api/uploads', methods=['GET'])
+def list_uploads():
+    """List uploaded images"""
+    try:
+        files = []
+        if os.path.exists(UPLOAD_FOLDER):
+            for filename in os.listdir(UPLOAD_FOLDER):
+                if allowed_file(filename):
+                    files.append({
+                        "filename": filename,
+                        "url": f"/uploads/{filename}"
+                    })
+        return jsonify({"files": files})
+    except Exception as e:
+        app.logger.error(f"List uploads error: {e}")
+        return jsonify({"error": "获取文件列表失败"}), 500
+
+
+@app.route('/api/uploads/<filename>', methods=['DELETE'])
+def delete_upload(filename):
+    """Delete uploaded image"""
+    try:
+        filename = secure_filename(filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+
+        if not os.path.exists(filepath):
+            return jsonify({"error": "文件不存在"}), 404
+
+        os.remove(filepath)
+        return jsonify({"status": "ok"})
+
+    except Exception as e:
+        app.logger.error(f"Delete error: {e}")
+        return jsonify({"error": "删除失败"}), 500
+
+
+@app.route('/uploads/<filename>')
+def serve_upload(filename):
+    """Serve uploaded files"""
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 
 @app.route('/api/chat', methods=['POST'])
