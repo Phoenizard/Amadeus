@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#0a0a0f"/>
+    </radialGradient>
+    <linearGradient id="hair" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b2635"/>
+      <stop offset="100%" style="stop-color:#5c1a24"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <circle cx="100" cy="100" r="100" fill="url(#bg)"/>
+  <!-- Red glow ring -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#e63946" stroke-width="2" opacity="0.5"/>
+  <!-- Hair silhouette -->
+  <ellipse cx="100" cy="85" rx="55" ry="60" fill="url(#hair)"/>
+  <ellipse cx="60" cy="110" rx="20" ry="45" fill="url(#hair)"/>
+  <ellipse cx="140" cy="110" rx="20" ry="45" fill="url(#hair)"/>
+  <!-- Face -->
+  <ellipse cx="100" cy="90" rx="35" ry="40" fill="#f5e6d3"/>
+  <!-- Eyes -->
+  <ellipse cx="85" cy="85" rx="8" ry="5" fill="#3d1a1a"/>
+  <ellipse cx="115" cy="85" rx="8" ry="5" fill="#3d1a1a"/>
+  <circle cx="85" cy="84" r="2" fill="#e63946"/>
+  <circle cx="115" cy="84" r="2" fill="#e63946"/>
+  <!-- Nose and mouth -->
+  <path d="M100 95 L100 100" stroke="#d4a574" stroke-width="1" fill="none"/>
+  <path d="M92 108 Q100 112 108 108" stroke="#c4847a" stroke-width="1.5" fill="none"/>
+  <!-- Lab coat hint -->
+  <path d="M65 145 L75 130 L100 140 L125 130 L135 145 L135 160 L65 160 Z" fill="#f0f0f0" opacity="0.9"/>
+  <path d="M80 135 L100 145 L120 135" stroke="#e63946" stroke-width="2" fill="none"/>
+  <!-- AMADEUS text -->
+  <text x="100" y="185" text-anchor="middle" font-family="monospace" font-size="10" fill="#e63946" opacity="0.7">AMADEUS</text>
+</svg>

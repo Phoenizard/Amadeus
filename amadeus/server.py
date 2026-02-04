@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Amadeus Web Server
+Flask backend for the Amadeus AI chat application
+"""
+
+import json
+import requests
+from flask import Flask, request, jsonify, send_from_directory
+
+from config import (
+    LLM_PROVIDER,
+    DASHSCOPE_API_KEY,
+    DASHSCOPE_MODEL,
+    DASHSCOPE_BASE_URL,
+    OLLAMA_BASE_URL,
+    OLLAMA_MODEL,
+    SYSTEM_PROMPT,
+    SERVER_PORT,
+    MAX_CONTEXT_MESSAGES,
+    API_TIMEOUT,
+)
+
+app = Flask(__name__, static_folder='static', static_url_path='')
+
+
+def call_dashscope(messages):
+    """Call DashScope API (Qwen)"""
+    if not DASHSCOPE_API_KEY:
+        raise ValueError("DASHSCOPE_API_KEY 未设置")
+
+    headers = {
+        "Authorization": f"Bearer {DASHSCOPE_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "model": DASHSCOPE_MODEL,
+        "messages": messages,
+    }
+
+    response = requests.post(
+        DASHSCOPE_BASE_URL,
+        headers=headers,
+        json=payload,
+        timeout=API_TIMEOUT,
+    )
+    response.raise_for_status()
+
+    data = response.json()
+    return data["choices"][0]["message"]["content"]
+
+
+def call_ollama(messages):
+    """Call Ollama API (local model)"""
+    url = f"{OLLAMA_BASE_URL}/api/chat"
+
+    payload = {
+        "model": OLLAMA_MODEL,
+        "messages": messages,
+        "stream": False,
+    }
+
+    response = requests.post(
+        url,
+        json=payload,
+        timeout=API_TIMEOUT,
+    )
+    response.raise_for_status()
+
+    data = response.json()
+    return data["message"]["content"]
+
+
+def call_llm(messages):
+    """Call the configured LLM provider"""
+    if LLM_PROVIDER == "dashscope":
+        return call_dashscope(messages)
+    elif LLM_PROVIDER == "ollama":
+        return call_ollama(messages)
+    else:
+        raise ValueError(f"未知的 LLM 提供商: {LLM_PROVIDER}")
+
+
+@app.route('/')
+def index():
+    """Serve the main page"""
+    return send_from_directory('static', 'index.html')
+
+
+@app.route('/api/health')
+def health():
+    """Health check endpoint"""
+    return jsonify({
+        "status": "ok",
+        "provider": LLM_PROVIDER,
+        "model": DASHSCOPE_MODEL if LLM_PROVIDER == "dashscope" else OLLAMA_MODEL,
+    })
+
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    """Chat endpoint - receives messages and returns AI response"""
+    try:
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "请求体为空"}), 400
+
+        user_message = data.get("message", "").strip()
+        history = data.get("history", [])
+
+        if not user_message:
+            return jsonify({"error": "消息不能为空"}), 400
+
+        # Build messages array with system prompt
+        messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+
+        # Add conversation history (limit to MAX_CONTEXT_MESSAGES)
+        if history:
+            # Take last N messages
+            recent_history = history[-MAX_CONTEXT_MESSAGES:]
+            messages.extend(recent_history)
+
+        # Add current user message
+        messages.append({"role": "user", "content": user_message})
+
+        # Call LLM
+        response_text = call_llm(messages)
+
+        return jsonify({
+            "response": response_text,
+            "status": "ok",
+        })
+
+    except requests.exceptions.Timeout:
+        return jsonify({"error": "AI 响应超时，请重试"}), 504
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"API request failed: {e}")
+        return jsonify({"error": "无法连接到 AI 服务"}), 503
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {e}")
+        return jsonify({"error": "服务器内部错误"}), 500
+
+
+if __name__ == '__main__':
+    print(f"""
+╔═══════════════════════════════════════════════════════════╗
+║                      AMADEUS SYSTEM                       ║
+║═══════════════════════════════════════════════════════════║
+║  Provider: {LLM_PROVIDER:<45} ║
+║  Model: {(DASHSCOPE_MODEL if LLM_PROVIDER == "dashscope" else OLLAMA_MODEL):<48} ║
+║  Port: {SERVER_PORT:<49} ║
+╚═══════════════════════════════════════════════════════════╝
+
+服务器已启动: http://localhost:{SERVER_PORT}
+手机访问请使用: http://<你的电脑IP>:{SERVER_PORT}
+""")
+    app.run(host='0.0.0.0', port=SERVER_PORT, debug=False)

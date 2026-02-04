@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod:*)",
+      "Bash(python3:*)",
+      "Bash(python3 -m py_compile:*)",
+      "Bash(pip3 install:*)"
+    ]
+  }
+}

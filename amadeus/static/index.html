@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0a0f">
+    <title>AMADEUS</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Splash Screen -->
+    <div id="splash" class="splash">
+        <div class="splash-content">
+            <div class="splash-logo">AMADEUS</div>
+            <div class="splash-subtitle">SYSTEM LOADING...</div>
+            <div class="splash-bar">
+                <div class="splash-bar-fill"></div>
+            </div>
+        </div>
+        <div class="scanlines"></div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-logo">AMADEUS</div>
+            <div class="header-status">
+                <span class="status-dot" id="statusDot"></span>
+                <span class="status-text" id="statusText">连接中...</span>
+            </div>
+        </header>
+
+        <!-- Character Portrait -->
+        <div class="portrait-container">
+            <div class="portrait-frame">
+                <img src="assets/kurisu.png" alt="Kurisu" class="portrait-image" id="portrait">
+                <div class="portrait-glow"></div>
+            </div>
+            <!-- Sound Wave Animation -->
+            <div class="sound-wave" id="soundWave">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-container" id="chatContainer">
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input
+                    type="text"
+                    id="messageInput"
+                    class="message-input"
+                    placeholder="输入消息..."
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="off"
+                >
+                <button id="sendButton" class="send-button" aria-label="发送">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Scanlines Overlay -->
+        <div class="scanlines"></div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js').catch(function(err) {
+                    console.log('ServiceWorker registration failed:', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
