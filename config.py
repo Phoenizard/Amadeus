@@ -51,7 +51,7 @@ SYSTEM_PROMPT = """你是 Amadeus，一个基于牧濑红莉栖记忆构建的�
 # =============================================================================
 
 # 服务器端口
-SERVER_PORT = int(os.environ.get("PORT", 5000))
+SERVER_PORT = int(os.environ.get("PORT", 5001))
 
 # 最大上下文消息数
 MAX_CONTEXT_MESSAGES = 20

@@ -67,19 +67,19 @@ python3 server.py
 ╔═══════════════════════════════════════════════════════════╗
 ║                      AMADEUS SYSTEM                       ║
 ...
-服务器已启动: http://localhost:5000
+服务器已启动: http://localhost:5001
 ```
 
 ### 6. 访问应用
 
-**电脑访问：** 打开浏览器，访问 http://localhost:5000
+**电脑访问：** 打开浏览器，访问 http://localhost:5001
 
 **手机访问：**
 1. 确保手机和电脑连接同一 WiFi
 2. 在电脑上查看本机 IP 地址：
    - Mac：系统偏好设置 → 网络 → 查看 IP 地址
    - Windows：打开 cmd，输入 `ipconfig`，找到 IPv4 地址
-3. 在手机浏览器输入：`http://你的电脑IP:5000`
+3. 在手机浏览器输入：`http://你的电脑IP:5001`
 4. 可以将网页添加到主屏幕，获得 App 般体验
 
 ## 使用本地模型 (Ollama)
@@ -102,7 +102,7 @@ A: 请按照步骤 4 正确配置 API Key。
 ### Q: 手机无法访问
 A:
 1. 确保手机和电脑在同一 WiFi 网络
-2. 检查电脑防火墙是否允许 5000 端口
+2. 检查电脑防火墙是否允许 5001 端口
 3. 确认使用的是电脑的局域网 IP（通常是 192.168.x.x）
 
 ### Q: AI 响应很慢
@@ -113,6 +113,24 @@ A: 编辑 `config.py` 中的 `SYSTEM_PROMPT` 变量。
 
 ### Q: 如何更换端口？
 A: 设置环境变量 `PORT=8080` 或修改 `config.py` 中的 `SERVER_PORT`。
+
+### Q: 如何更换人物图片？
+A: 将你的图片重命名为 `kurisu.png`，替换 `static/assets/kurisu.png` 文件即可。如果浏览器显示旧图片，请强制刷新页面（Mac: `Cmd+Shift+R`，Windows: `Ctrl+Shift+R`）。
+
+### Q: 提示"Address already in use"端口被占用
+A: 端口被之前未关闭的进程占用。执行以下命令终止占用进程后重启：
+
+Mac/Linux：
+```bash
+lsof -ti:5001 | xargs kill -9
+python3 server.py
+```
+
+Windows：
+```cmd
+for /f "tokens=5" %a in ('netstat -ano ^| findstr :5001') do taskkill /PID %a /F
+python3 server.py
+```
 
 ## 文件说明
 
